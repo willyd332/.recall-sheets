@@ -12,7 +12,12 @@
 <body>
     <!-- Token Tracker -->
     <div id="tokenTracker" class="token-tracker">
-        <div class="token-stat">In  Tokens: <span class="token-value" id="inTokens">0</span></div>
+        <div class="model-display" id="modelDisplay">Model Used: <span class="model-name" id="modelName">-</span>
+            <select class="model-dropdown" id="modelDropdown" onchange="updateModel(this.value)">
+                <!-- Options populated dynamically -->
+            </select>
+        </div>
+        <div class="token-stat">In &nbsp;Tokens: <span class="token-value" id="inTokens">0</span></div>
         <div class="token-stat">Out Tokens: <span class="token-value" id="outTokens">0</span></div>
     </div>
 
@@ -42,8 +47,13 @@
     <!-- Create View -->
     <div id="createView" class="view">
         <div class="create-container">
-            <div class="floating-card title-card">
-                <input type="text" id="createTitle" class="minimal-input" placeholder="Title">
+            <div class="title-section">
+                <div class="floating-card title-card">
+                    <input type="text" id="createTitle" class="minimal-input" placeholder="Title">
+                </div>
+                <div class="floating-card download-card">
+                    <button class="download-btn" onclick="downloadRecallOnly()" title="Download .recall">↓</button>
+                </div>
             </div>
             
             <div class="cards-row">
@@ -63,7 +73,7 @@
             
             <div class="create-actions">
                 <a href="https://github.com/willyd332/chamber_of_recollection" target="_blank" class="help-link">Need Help?</a>
-                <button class="action-btn primary" onclick="downloadRecall()">Download & Continue</button>
+                <button class="action-btn primary" onclick="continueToEdit()">Continue</button>
             </div>
         </div>
         
@@ -79,8 +89,13 @@
             </div>
             
             <div id="editContent" class="edit-content">
-                <div class="floating-card title-card">
-                    <input type="text" id="editTitle" class="minimal-input">
+                <div class="title-section">
+                    <div class="floating-card title-card">
+                        <input type="text" id="editTitle" class="minimal-input">
+                    </div>
+                    <div class="floating-card download-card">
+                        <button class="download-btn" onclick="downloadEdited()" title="Download .recall">↓</button>
+                    </div>
                 </div>
                 
                 <div class="cards-row" id="promptCards">
@@ -117,7 +132,6 @@
                 <div class="edit-actions">
                     <a href="https://github.com/willyd332/chamber_of_recollection" target="_blank" class="help-link">Need Help?</a>
                     <div>
-                        <button class="action-btn" onclick="downloadEdited()">Download</button>
                         <button class="action-btn primary" onclick="launchFromEdit()">Launch</button>
                     </div>
                 </div>
@@ -135,11 +149,15 @@
                 <input type="file" id="launchFileInput" accept=".recall" style="display: none;">
             </div>
             
-            <div id="launchReady" class="launch-ready hidden">
-                <button class="action-btn primary large" onclick="this.style.visibility='hidden';startSession()">Launch .recall</button>
+            <div id="launchReady" class="launch-ready" style="display: none;">
+                <button class="action-btn primary large" id="launchButton" onclick="startSession()">Launch .recall</button>
+                <div class="inline-loading-bar" id="inlineLoadingBar" style="display: none;">
+                    <div class="loading-message">Creating question...</div>
+                    <div class="glowing-bar"><div class="glowing-bar-inner"></div></div>
+                </div>
             </div>
             
-            <div id="sessionContent" class="session-content hidden">
+            <div id="sessionContent" class="session-content" style="display: none;">
                 <div class="question-container">
                     <div id="questionText" class="question-text"></div>
                 </div>

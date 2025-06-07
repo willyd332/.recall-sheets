@@ -185,20 +185,26 @@ class AIHandler {
      * @private
      */
     async _callOpenAI(systemPrompt, userPrompt, extractContent = false) {
+        const requestBody = {
+            model: this.model,
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ]
+        };
+        
+        // o1 model doesn't support temperature parameter
+        if (this.model !== 'o1') {
+            requestBody.temperature = 0.7;
+        }
+        
         const response = await fetch(this.endpoints.openai, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.apiKey}`
             },
-            body: JSON.stringify({
-                model: this.model,
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.7
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {

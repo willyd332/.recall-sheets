@@ -22,12 +22,50 @@ let tokenStats = {
     outTokens: parseInt(localStorage.getItem('outTokens') || '0')
 };
 
+// Model definitions
+const MODELS = {
+    openai: {
+        default: 'gpt-4o',
+        options: [
+            { value: 'gpt-4o', label: 'GPT-4o' },
+            { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+            { value: 'o1', label: 'O1' },
+            { value: 'o3', label: 'O3' }
+            // Note: o3-mini can be added here when available
+        ]
+    },
+    anthropic: {
+        default: 'claude-3-5-sonnet-latest',
+        options: [
+            { value: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet' },
+            { value: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku' },
+            { value: 'claude-3-7-sonnet-latest', label: 'Claude 3.7 Sonnet' },
+            { value: 'claude-sonnet-4-0', label: 'Claude Sonnet 4.0' },
+            { value: 'claude-opus-4-0', label: 'Claude Opus 4.0' }
+        ]
+    },
+    deepseek: {
+        default: 'deepseek-chat',
+        options: [
+            { value: 'deepseek-chat', label: 'DeepSeek Chat' }
+        ]
+    },
+    google: {
+        default: 'gemini-1.5-flash',
+        options: [
+            { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+            { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+        ]
+    }
+};
+
 // DOM Elements
 const elements = {
     apiKeyInput: document.getElementById('apiKeyInput'),
     apiStatus: document.getElementById('apiStatus'),
     mainActions: document.getElementById('mainActions'),
     tokenTracker: document.getElementById('tokenTracker'),
+    modelName: document.getElementById('modelName'),
     inTokens: document.getElementById('inTokens'),
     outTokens: document.getElementById('outTokens'),
     processingOverlay: document.getElementById('processingOverlay'),
@@ -46,8 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check for existing API key
     const savedKey = localStorage.getItem('apiKey');
-    if (savedKey) {
+    const savedProvider = localStorage.getItem('apiProvider');
+    const savedModel = localStorage.getItem('apiModel');
+    
+    if (savedKey && savedProvider && savedModel) {
         elements.apiKeyInput.value = savedKey;
+        
+        // Configure AI handler
+        aiHandler.configure(savedProvider, savedKey, savedModel);
+        
+        // Update model display and populate dropdown
+        elements.modelName.textContent = savedModel;
+        populateModelDropdown(savedProvider, savedModel);
+        
+        // Show token tracker
+        elements.tokenTracker.classList.add('visible');
+        
         validateAndShowActions();
     }
     
@@ -122,6 +174,10 @@ async function handleApiKeyInput() {
         // Configure AI handler
         aiHandler.configure(provider.name, apiKey, provider.defaultModel);
         
+        // Update model display and populate dropdown
+        elements.modelName.textContent = provider.defaultModel;
+        populateModelDropdown(provider.name, provider.defaultModel);
+        
         // Show success and actions
         elements.apiStatus.textContent = '✓ connected';
         
@@ -139,13 +195,13 @@ async function handleApiKeyInput() {
 
 function detectProvider(apiKey) {
     if (apiKey.startsWith('sk-') && !apiKey.startsWith('sk-ant-')) {
-        return { name: 'openai', defaultModel: 'gpt-4o-mini' };
+        return { name: 'openai', defaultModel: MODELS.openai.default };
     } else if (apiKey.startsWith('sk-ant-')) {
-        return { name: 'anthropic', defaultModel: 'claude-3-5-haiku-20241022' };
+        return { name: 'anthropic', defaultModel: MODELS.anthropic.default };
     } else if (apiKey.length === 32) { // DeepSeek keys are typically 32 chars
-        return { name: 'deepseek', defaultModel: 'deepseek-chat' };
+        return { name: 'deepseek', defaultModel: MODELS.deepseek.default };
     } else if (apiKey.startsWith('AI')) { // Google API keys
-        return { name: 'google', defaultModel: 'gemini-1.5-flash' };
+        return { name: 'google', defaultModel: MODELS.google.default };
     }
     return null;
 }
@@ -189,6 +245,51 @@ window.showView = function(viewName) {
 };
 
 // Create View Functions
+window.downloadRecallOnly = function() {
+    const title = document.getElementById('createTitle').value.trim() || 'untitled';
+    const context = document.getElementById('createContext').value.trim();
+    const ingest = document.getElementById('createIngest').value.trim();
+    const digest = document.getElementById('createDigest').value.trim();
+    
+    if (!context || !ingest || !digest) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Create recall data
+    const recallData = recallFileHandler.createNewRecallData(title);
+    recallData.contextPrompt = context;
+    recallData.inputPrompt = ingest;
+    recallData.outputPrompt = digest;
+    
+    // Save file only - no navigation
+    const filename = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    recallFileHandler.saveToFile(recallData, filename);
+};
+
+window.continueToEdit = function() {
+    const title = document.getElementById('createTitle').value.trim() || 'untitled';
+    const context = document.getElementById('createContext').value.trim();
+    const ingest = document.getElementById('createIngest').value.trim();
+    const digest = document.getElementById('createDigest').value.trim();
+    
+    if (!context || !ingest || !digest) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Create recall data
+    const recallData = recallFileHandler.createNewRecallData(title);
+    recallData.contextPrompt = context;
+    recallData.inputPrompt = ingest;
+    recallData.outputPrompt = digest;
+    
+    // Load into edit view
+    currentRecallData = recallData;
+    loadIntoEditView(recallData);
+    showView('edit');
+};
+
 window.downloadRecall = function() {
     const title = document.getElementById('createTitle').value.trim() || 'untitled';
     const context = document.getElementById('createContext').value.trim();
@@ -456,24 +557,18 @@ function loadIntoLaunchView(recallData) {
     
     setTimeout(() => {
         uploadZone.classList.add('hidden');
-        launchReady.classList.remove('hidden');
-        launchReady.style.display = 'block';
+        launchReady.style.display = 'block';  // Show the launch ready container
     }, 800);
 }
 
 window.startSession = function() {
     // Get elements
-    const launchReadyDiv = document.getElementById('launchReady');
-    const sessionContent = document.getElementById('sessionContent');
+    const launchButton = document.getElementById('launchButton');
+    const inlineLoadingBar = document.getElementById('inlineLoadingBar');
     
-    // Immediately hide the launch button container
-    launchReadyDiv.style.display = 'none';
-    
-    // Show session content
-    sessionContent.classList.remove('hidden');
-    
-    // Show processing overlay with custom message
-    showProcessingOverlay('Creating question...');
+    // Hide button and show loading bar
+    launchButton.style.display = 'none';
+    inlineLoadingBar.style.display = 'block';
     
     // Start session
     sessionState.active = true;
@@ -496,9 +591,16 @@ async function nextQuestion() {
     questionEl.classList.remove('typing');
     questionEl.textContent = '';
     
-    // Show processing overlay for subsequent questions
+    // For subsequent questions, show loading bar and hide session content
     if (sessionState.currentIndex !== undefined) {
-        showProcessingOverlay('Creating question...');
+        const inlineLoadingBar = document.getElementById('inlineLoadingBar');
+        const sessionContent = document.getElementById('sessionContent');
+        const launchReady = document.getElementById('launchReady');
+        
+        // Hide session content and show loading in launch area
+        sessionContent.style.display = 'none';
+        launchReady.style.display = 'block';
+        inlineLoadingBar.style.display = 'block';
     }
     
     // Get random block
@@ -536,8 +638,12 @@ async function nextQuestion() {
         sessionState.currentQuestion = qa.question;
         sessionState.currentAnswer = qa.answer;
         
-        // Hide processing overlay before typing
-        hideProcessingOverlay();
+        // Hide loading area and show session content
+        const launchReady = document.getElementById('launchReady');
+        const sessionContent = document.getElementById('sessionContent');
+        
+        launchReady.style.display = 'none';
+        sessionContent.style.display = 'block';
         
         // Type out question
         await typeText(qa.question, 'questionText');
@@ -547,8 +653,26 @@ async function nextQuestion() {
         
     } catch (error) {
         console.error('Question generation error:', error);
-        hideProcessingOverlay();
-        questionEl.textContent = 'Error generating question. Press Enter to try another.';
+        
+        // Hide loading area and show session content with error
+        const launchReady = document.getElementById('launchReady');
+        const sessionContent = document.getElementById('sessionContent');
+        
+        launchReady.style.display = 'none';
+        sessionContent.style.display = 'block';
+        
+        // Check for specific error messages
+        let errorMessage = 'Error generating question. Press Enter to try another.';
+        
+        if (error.message.includes('verified to use the model `o3`')) {
+            errorMessage = 'Your API key does not have access to o3 model. Please select a new one.';
+        } else if (error.message.includes('model_not_found')) {
+            errorMessage = 'Model not available for your API key. Please select a different model.';
+        } else if (error.message.includes('temperature') && error.message.includes('not supported')) {
+            errorMessage = 'Model configuration error. Please try a different model.';
+        }
+        
+        questionEl.textContent = errorMessage;
         questionEl.classList.add('typing'); // Add typing class for error state too
         sessionHint.classList.add('visible');
     }
@@ -620,4 +744,43 @@ function showProcessingOverlay(message) {
 
 function hideProcessingOverlay() {
     elements.processingOverlay.classList.remove('active');
-} 
+}
+
+// Populate model dropdown
+function populateModelDropdown(providerName, currentModel) {
+    const dropdown = document.getElementById('modelDropdown');
+    const models = MODELS[providerName];
+    
+    if (!models) return;
+    
+    // Clear existing options
+    dropdown.innerHTML = '';
+    
+    // Add options
+    models.options.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = model.label;
+        if (model.value === currentModel) {
+            option.selected = true;
+        }
+        dropdown.appendChild(option);
+    });
+}
+
+// Update model selection
+window.updateModel = function(newModel) {
+    // Update AI handler
+    const provider = localStorage.getItem('apiProvider');
+    const apiKey = localStorage.getItem('apiKey');
+    
+    if (provider && apiKey) {
+        aiHandler.configure(provider, apiKey, newModel);
+        
+        // Save to localStorage
+        localStorage.setItem('apiModel', newModel);
+        
+        // Update display
+        elements.modelName.textContent = newModel;
+    }
+}; 
