@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.recall</title>
+    <link rel="stylesheet" href="css/dark-minimal.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Token Tracker -->
+    <div id="tokenTracker" class="token-tracker">
+        <div class="token-stat">In  Tokens: <span class="token-value" id="inTokens">0</span></div>
+        <div class="token-stat">Out Tokens: <span class="token-value" id="outTokens">0</span></div>
+    </div>
+
+    <!-- Top Right Links -->
+    <div class="top-links">
+        <button class="top-link" onclick="location.reload()">Restart</button>
+        <a href="https://github.com/willyd332/chamber_of_recollection" target="_blank" class="top-link">About</a>
+    </div>
+
+    <!-- Landing View -->
+    <div id="landingView" class="view active">
+        <div class="center-content">
+            <h1 class="title"><span class="dot">.</span>recall</h1>
+            <div class="api-input-container">
+                <input type="password" id="apiKeyInput" class="api-input" placeholder="insert GPT or Claude api key here" autocomplete="off">
+                <div class="api-status" id="apiStatus"></div>
+            </div>
+            
+            <div id="mainActions" class="main-actions hidden">
+                <button class="action-btn" onclick="showView('create')">Create .recall</button>
+                <button class="action-btn" onclick="showView('edit')">Edit .recall</button>
+                <button class="action-btn" onclick="showView('launch')">Launch .recall</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create View -->
+    <div id="createView" class="view">
+        <div class="create-container">
+            <div class="floating-card title-card">
+                <input type="text" id="createTitle" class="minimal-input" placeholder="Title">
+            </div>
+            
+            <div class="cards-row">
+                <div class="floating-card">
+                    <label>Context</label>
+                    <textarea id="createContext" class="minimal-textarea" placeholder="What is this recall sheet about?"></textarea>
+                </div>
+                <div class="floating-card">
+                    <label>Ingest</label>
+                    <textarea id="createIngest" class="minimal-textarea" placeholder="How should information be processed?"></textarea>
+                </div>
+                <div class="floating-card">
+                    <label>Digest</label>
+                    <textarea id="createDigest" class="minimal-textarea" placeholder="How should questions be generated?"></textarea>
+                </div>
+            </div>
+            
+            <div class="create-actions">
+                <a href="https://github.com/willyd332/chamber_of_recollection" target="_blank" class="help-link">Need Help?</a>
+                <button class="action-btn primary" onclick="downloadRecall()">Download & Continue</button>
+            </div>
+        </div>
+        
+        <button class="back-btn" onclick="showView('landing')">←</button>
+    </div>
+
+    <!-- Edit View -->
+    <div id="editView" class="view">
+        <div class="edit-container">
+            <div class="upload-zone" id="editUploadZone">
+                <p>Drop .recall file or click to upload</p>
+                <input type="file" id="editFileInput" accept=".recall" style="display: none;">
+            </div>
+            
+            <div id="editContent" class="edit-content">
+                <div class="floating-card title-card">
+                    <input type="text" id="editTitle" class="minimal-input">
+                </div>
+                
+                <div class="cards-row" id="promptCards">
+                    <div class="floating-card" id="contextCard">
+                        <label>Context</label>
+                        <textarea id="editContext" class="minimal-textarea"></textarea>
+                    </div>
+                    <div class="floating-card" id="ingestCard">
+                        <label>Ingest</label>
+                        <textarea id="editIngest" class="minimal-textarea"></textarea>
+                    </div>
+                    <div class="floating-card" id="digestCard">
+                        <label>Digest</label>
+                        <textarea id="editDigest" class="minimal-textarea"></textarea>
+                    </div>
+                </div>
+                
+                <div class="ingest-section">
+                    <div class="floating-card wide">
+                        <label>Ingest Information</label>
+                        <textarea id="ingestInfo" class="minimal-textarea large" placeholder="Paste or type information to add..."></textarea>
+                        <button class="action-btn" onclick="processInfo()">Process</button>
+                    </div>
+                    
+                    <div class="info-blocks-container">
+                        <div class="info-blocks-header">
+                            <span class="info-blocks-title">Information Blocks</span>
+                            <button class="collapse-btn collapsed" onclick="toggleInfoBlocks()" id="collapseBtn">▶</button>
+                        </div>
+                        <div id="infoBlocks" class="info-blocks" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="edit-actions">
+                    <a href="https://github.com/willyd332/chamber_of_recollection" target="_blank" class="help-link">Need Help?</a>
+                    <div>
+                        <button class="action-btn" onclick="downloadEdited()">Download</button>
+                        <button class="action-btn primary" onclick="launchFromEdit()">Launch</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="back-btn" onclick="showView('landing')">←</button>
+    </div>
+
+    <!-- Launch View -->
+    <div id="launchView" class="view">
+        <div class="launch-container">
+            <div id="launchUpload" class="upload-zone">
+                <p>Drop .recall file or click to upload</p>
+                <input type="file" id="launchFileInput" accept=".recall" style="display: none;">
+            </div>
+            
+            <div id="launchReady" class="launch-ready hidden">
+                <button class="action-btn primary large" onclick="this.style.visibility='hidden';startSession()">Launch .recall</button>
+            </div>
+            
+            <div id="sessionContent" class="session-content hidden">
+                <div class="question-container">
+                    <div id="questionText" class="question-text"></div>
+                </div>
+                <div id="answerBox" class="answer-box hidden">
+                    <div id="answerText" class="answer-text"></div>
+                </div>
+                
+                <div class="session-hint" id="sessionHint">Press Enter to continue</div>
+            </div>
+        </div>
+        
+        <button class="back-btn" onclick="showView('landing')">←</button>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div id="processingOverlay" class="processing-overlay"></div>
+
+    <script src="js/recall-file-handler.js"></script>
+    <script src="js/ai-handler.js"></script>
+    <script src="js/dark-minimal-app.js"></script>
+</body>
+</html> 

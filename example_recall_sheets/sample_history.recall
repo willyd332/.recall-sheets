@@ -1,0 +1,36 @@
+The French Revolution
+2024-01-15T10:30:00.000Z
+=======
+This recall sheet contains information about the French Revolution (1789-1799), one of the most significant events in world history. The information here covers key events, figures, and concepts that shaped this period of radical political and social upheaval in France.
+=======
+Information should be organized chronologically when possible, with clear connections between causes and effects. Each piece of information should explain not just what happened, but why it mattered and how it connected to other events. Focus on understanding the flow of events and their significance rather than memorizing dates.
+=======
+Generate questions that require deep understanding of the French Revolution. Ask about causes and effects, comparisons between different phases, analysis of key figures' motivations, and the revolution's long-term impacts. Questions should encourage thinking about why events unfolded as they did, not just recalling facts. For example, instead of "When did the Revolution begin?", ask "What combination of factors made revolution inevitable by 1789?"
+=======
+[
+  {
+    "id": 1705318200000,
+    "content": "The French Revolution began in 1789 due to a financial crisis. France was deeply in debt from wars, including supporting the American Revolution. King Louis XVI called the Estates-General for the first time since 1614 to approve new taxes. This assembly included representatives from three estates: clergy (First Estate), nobility (Second Estate), and commoners (Third Estate). The Third Estate, representing 98% of the population but having only one-third of the votes, demanded reform.",
+    "metadata": {"phase": "origins", "year": 1789}
+  },
+  {
+    "id": 1705318200001,
+    "content": "The Tennis Court Oath (June 20, 1789) marked a crucial turning point. When locked out of their meeting hall, Third Estate delegates gathered at a tennis court and swore not to disband until France had a new constitution. They declared themselves the National Assembly, claiming to represent the nation's will. This act of defiance transformed a financial crisis into a political revolution, challenging the absolute monarchy's legitimacy.",
+    "metadata": {"phase": "constitutional", "year": 1789}
+  },
+  {
+    "id": 1705318200002,
+    "content": "The storming of the Bastille (July 14, 1789) became the revolution's defining moment. Parisians, fearing royal troops would suppress the National Assembly, seized weapons and attacked this symbol of royal oppression. The fortress's fall demonstrated the people's power and marked the revolution's violent turn. July 14th remains France's national day, celebrating popular sovereignty over absolutism.",
+    "metadata": {"phase": "constitutional", "year": 1789}
+  },
+  {
+    "id": 1705318200003,
+    "content": "The Declaration of the Rights of Man and Citizen (August 1789) embodied Enlightenment principles in revolutionary practice. It proclaimed that 'men are born and remain free and equal in rights,' establishing individual liberty, property rights, and popular sovereignty as fundamental principles. This document influenced democratic movements worldwide but notably excluded women and slaves, revealing the revolution's limitations.",
+    "metadata": {"phase": "constitutional", "year": 1789}
+  },
+  {
+    "id": 1705318200004,
+    "content": "The Civil Constitution of the Clergy (1790) subordinated the Catholic Church to the state, requiring priests to swear loyalty to the constitution. This split French Catholics between 'constitutional' and 'refractory' clergy, creating deep divisions that persisted for generations. The measure aimed to break the Church's power as a pillar of the old regime but instead created new sources of counter-revolutionary resistance.",
+    "metadata": {"phase": "constitutional", "year": 1790}
+  }
+] 
