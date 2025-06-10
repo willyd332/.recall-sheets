@@ -36,8 +36,8 @@ class AIHandler {
      * @returns {Promise<Array>} Array of processed information blocks
      */
     async processInformation(information, inputPrompt, contextPrompt) {
-        const systemPrompt = `${contextPrompt}\n\nProcessing Instructions: ${inputPrompt}`;
-        const userPrompt = `Process the following information according to the instructions. Break it into discrete, well-organized blocks of information. Return ONLY a valid JSON array where each element is a string containing one information block. No additional text or explanation.\n\nInformation to process:\n${information}`;
+        const systemPrompt = `You are a pro information processor. You are tasked with reading large amounts of information and organizing it into useful, summarized blocks for later study. You are adaptable, since different subjects and topics require different approaches. Your topic of focus today is: ${contextPrompt}`;
+        const userPrompt = `Processing Instructions: ${inputPrompt}\n\nProcess the following information according to the instructions. Break it into discrete, well-organized blocks of information. Return ONLY a valid JSON array where each element is a string containing one information block. No additional text or explanation.\n\nInformation to process:\n${information}`;
         
         const response = await this._makeAPICall(systemPrompt, userPrompt, true);
         
@@ -101,7 +101,7 @@ class AIHandler {
      * @returns {Promise<Object>} Object with question and answer
      */
     async generateQuestionAnswer(blockWithContext, outputPrompt, contextPrompt) {
-        const systemPrompt = `${contextPrompt}\n\nQuestion Generation Instructions: ${outputPrompt}`;
+        const systemPrompt = `You are a pro information processor and study helper. You are tasked with taking blocks of information and generating 'study prompts' based on the user's instructions to help them train their active recall. You are adaptable, since different subjects and topics require different approaches. The general topic of focus today is: ${contextPrompt}`;
         
         let contextInfo = '';
         if (blockWithContext.contextBefore.length > 0) {
@@ -111,7 +111,7 @@ class AIHandler {
             contextInfo += '\nFollowing context:\n' + blockWithContext.contextAfter.map(b => b.content).join('\n');
         }
         
-        const userPrompt = `Generate an active recall question and comprehensive answer based on the following information.${contextInfo}\n\nMain information:\n${blockWithContext.mainBlock.content}\n\nReturn ONLY valid JSON with the structure: {"question": "...", "answer": "..."}`;
+        const userPrompt = `Study Prompt Generation Instructions: ${outputPrompt}\n\n Based on the instructions above, generate an active recall prompt (this will be delivered to the student) and a comprehensive answer (which will be hidden from the student, but used later to check their understanding) based on the following block of information and the context your were given in your system prompt. Main information:\n${blockWithContext.mainBlock.content}\n\nReturn ONLY valid JSON with the structure: {"question": "...", "answer": "..."}`;
         
         const response = await this._makeAPICall(systemPrompt, userPrompt, true);
         
