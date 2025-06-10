@@ -140,6 +140,28 @@ function addTokens(inTokens, outTokens) {
     updateTokenDisplay();
 }
 
+// Reset token count
+window.resetTokenCount = function() {
+    // Reset stats
+    tokenStats.inTokens = 0;
+    tokenStats.outTokens = 0;
+    
+    // Clear localStorage
+    localStorage.setItem('inTokens', '0');
+    localStorage.setItem('outTokens', '0');
+    
+    // Update display with animation
+    elements.inTokens.classList.add('pulse');
+    elements.outTokens.classList.add('pulse');
+    
+    setTimeout(() => {
+        elements.inTokens.classList.remove('pulse');
+        elements.outTokens.classList.remove('pulse');
+    }, 300);
+    
+    updateTokenDisplay();
+};
+
 // API Key Handling
 async function handleApiKeyInput() {
     const apiKey = elements.apiKeyInput.value.trim();

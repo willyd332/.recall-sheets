@@ -918,4 +918,32 @@ body {
 @keyframes pulse {
     0%, 100% { opacity: 0.3 }
     50% { opacity: 1 }
+}
+
+.reset-tokens-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.6s forwards;
+}
+
+.reset-tokens-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    opacity: 1;
+}
+
+.token-tracker:hover .reset-tokens-btn {
+    opacity: 0.6;
+}
+
+.token-tracker:hover .reset-tokens-btn:hover {
+    opacity: 1;
 } 

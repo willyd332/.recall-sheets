@@ -12,13 +12,15 @@
 <body>
     <!-- Token Tracker -->
     <div id="tokenTracker" class="token-tracker">
-        <div class="model-display" id="modelDisplay">Model Used: <span class="model-name" id="modelName">-</span>
+        <div class="model-display" id="modelDisplay">
+            Model: <span class="model-name" id="modelName">-</span>
             <select class="model-dropdown" id="modelDropdown" onchange="updateModel(this.value)">
                 <!-- Options populated dynamically -->
             </select>
         </div>
-        <div class="token-stat">In &nbsp;Tokens: <span class="token-value" id="inTokens">0</span></div>
+        <div class="token-stat">In  Tokens: <span class="token-value" id="inTokens">0</span></div>
         <div class="token-stat">Out Tokens: <span class="token-value" id="outTokens">0</span></div>
+        <button class="reset-tokens-btn" onclick="resetTokenCount()" title="Reset token count">↻</button>
     </div>
 
     <!-- Top Right Links -->
