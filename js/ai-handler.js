@@ -37,7 +37,7 @@ class AIHandler {
      */
     async processInformation(information, inputPrompt, contextPrompt) {
         const systemPrompt = `You are a pro information processor. You are tasked with reading large amounts of information and organizing it into useful, summarized blocks for later study. You are adaptable, since different subjects and topics require different approaches. Your topic of focus today is: ${contextPrompt}`;
-        const userPrompt = `Processing Instructions: ${inputPrompt}\n\nProcess the following information according to the instructions. Break it into discrete, well-organized blocks of information. Return ONLY a valid JSON array where each element is a string containing one information block. No additional text or explanation.\n\nInformation to process:\n${information}`;
+        const userPrompt = `Processing Instructions: ${inputPrompt}\n\nProcess the following information according to the instructions. Break it down into blocks of information. Return ONLY a valid JSON array where each element is a string (string can be any length; use the instructions to determine the best length. It might vary from block to block.) containing one information block.\n\nInformation to process:\n${information}`;
         
         const response = await this._makeAPICall(systemPrompt, userPrompt, true);
         
@@ -234,7 +234,6 @@ class AIHandler {
                 messages: [
                     { role: 'user', content: userPrompt + '\n\nPlease respond with valid JSON only.' }
                 ],
-                max_tokens: 4096,
                 temperature: 0.7
             })
         });
@@ -298,7 +297,6 @@ class AIHandler {
                 }],
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 4096
                 }
             })
         });
